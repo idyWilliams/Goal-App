@@ -1,28 +1,52 @@
 import { useState } from "react";
-import { StyleSheet, View, FlatList } from "react-native";
+import { StyleSheet, View, FlatList, Alert, Button } from "react-native";
 import GoalItem from "./component/GoalItem";
 import GoalInput from "./component/GoalInput";
 
 export default function App() {
   const [courseGoals, setCourseGoals] = useState([]);
+  const [modalIsVisible, setModalIsVisible] = useState(false);
 
+  const startAddGoal = () => {
+    setModalIsVisible((prevState) => !prevState);
+  };
   const addGoalHandler = (value) => {
     setCourseGoals((currentCourseGoals) => [
       ...currentCourseGoals,
       { text: value, id: Math.random().toString() },
     ]);
+    startAddGoal();
   };
- const deleteGoal = () =>{
-  console.log("dlete");
- }
+  const deleteGoal = (id) => {
+    setCourseGoals((currentCourseGoals) => {
+      return currentCourseGoals.filter((goal) => goal.id !== id);
+    });
+  };
+
   return (
     <View style={styles.appContainer}>
-      <GoalInput onAddGoal={addGoalHandler} />
+      <View style={styles.CTA}>
+        <Button title="Add Goal" color="#0eb683" onPress={startAddGoal} />
+      </View>
+
+      {modalIsVisible && (
+        <GoalInput
+          onAddGoal={addGoalHandler}
+          setModal={startAddGoal}
+          showModal={modalIsVisible}
+        />
+      )}
       <View style={styles.goalsContainer}>
         <FlatList
           data={courseGoals}
           renderItem={(itemData) => {
-            return <GoalItem text={itemData?.item?.text} onDelete={deleteGoal}/>;
+            return (
+              <GoalItem
+                text={itemData?.item?.text}
+                onDelete={deleteGoal}
+                id={itemData?.item.id}
+              />
+            );
           }}
           alwaysBounceVertical={false}
           keyExtractor={(item, index) => {
@@ -39,13 +63,14 @@ const styles = StyleSheet.create({
     paddingTop: 30,
     paddingHorizontal: 16,
     height: "100%",
-    // paddingVertical: 10,
-    // flexDirection: "column",
-    // alignItems: 'flex-end',
+   
   },
 
   goalsContainer: {
     flex: 6,
     // alignItems: "center",
+  },
+  CTA: {
+    marginTop: 16,
   },
 });
